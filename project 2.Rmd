@@ -1,8 +1,8 @@
 ---
-title: Larry Bird the most well-rounded player of all time 
-author: R package build
-date: '2022-04-22'
-slug: Larry-bird-Go-Crazy
+title: 'Larry Bird is the most well-rounded player of all time '
+author: Javin Wright
+date: '2022-05-01'
+slug: larry-bird-is-the-most-well-rounded-player-of-all-time
 categories: []
 tags: []
 ---
