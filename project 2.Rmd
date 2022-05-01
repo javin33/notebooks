@@ -1,0 +1,180 @@
+---
+title: Larry Bird the most well-rounded player of all time 
+author: R package build
+date: '2022-04-22'
+slug: Larry-bird-Go-Crazy
+categories: []
+tags: []
+---
+larry bird is the most well-rounded player of all time 
+
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(ggalt)
+ library(ggrepel)
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+url <- "https://www.basketball-reference.com/leaders/stl_career.html"
+
+steals <- url %>%
+  read_html() %>%
+  html_nodes(xpath='//*[@id="nba"]') %>%
+  html_table()
+
+steals <- steals[[1]] %>% mutate(Player = gsub("\\*", "", Player))
+
+
+
+
+url <- "https://www.basketball-reference.com/leaders/blk_career.html" 
+
+blocks <- url %>%
+  read_html() %>%
+  html_nodes(xpath='//*[@id="nba"]') %>%
+  html_table()
+
+blocks <- blocks[[1]] %>% mutate(Player = gsub("\\*", "", Player))
+
+defensivestats <- blocks %>% inner_join(steals, by=c("Player" = "Player"))
+
+
+legends <- c("LeBron James", "Larry Bird", "Kobe Bryant", "Michael Jordan", "Kareem Abdul-Jabbar",  "Dirk Nowitzki","Dwyane Wade","
+James Harden")
+
+greats <- defensivestats %>% filter(Player %in% legends)
+
+birddefense <- greats %>% filter(Player == "Larry Bird")
+
+
+
+ggplot() +
+  geom_point(data=defensivestats, aes(x=BLK, y=STL))+
+    geom_point(data=birddefense, aes(x=BLK, y=STL), color = "green") + 
+  geom_text_repel(data=greats, aes(x=BLK, y=STL, label=Player))
+  
+
+```
+---
+  As a well-rounded player you have to be better than average on offense and defense. Larry Bird stats show that he was not the best at steals, Blocks, and overall defensive stats.But his stats are in the discussion with a couple of the best defenders who have played the game. His stas show that he was beter than most people in the NBA when defending and is not a push-over when guarding against the greats like Michael Jordan and Magic Johnson.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+url <- "https://www.basketball-reference.com/leaders/fg3_pct_career.html"
+
+threepointpct <- url %>% 
+  read_html() %>%
+  html_nodes(xpath='//*[@id="nba"]') %>%
+  html_table()
+
+threepointpct <- threepointpct[[1]] %>% mutate(Player = gsub("\\*", "", Player))
+
+
+
+url <- "https://www.basketball-reference.com/leaders/fg2_pct_career_p.html"
+
+twopointpct <- url %>% 
+  read_html() %>%
+  html_nodes(xpath='//*[@id="nba"]') %>%
+  html_table()
+
+
+
+twopointpct <- twopointpct[[1]] %>% mutate(Player = gsub("\\*", "", Player))
+ 
+shooters <- twopointpct %>% inner_join(threepointpct, by=c("Player" = "Player")) 
+
+
+legends <- c("Stephen Curry", "Larry Bird", "Ray Allen", "Kevin Durant", "Terry Porter", "Steve Nash", "Dirk Nowitzki", "Kyrie Irving")
+greats <- shooters %>% filter(Player %in% legends)
+
+ggplot() +
+  geom_dumbbell(data=greats, 
+                aes(y=Player, x=Rank.y,
+                    xend=Rank.x),
+    size = 2,
+    colour = "pink",
+    colour_x = "purple",
+    colour_xend = "orange") +
+  coord_flip()
+```
+
+---
+  This shows that Larry Bird is able to compete with the best shooters of this generation and the best shooters of all time based on the data provided. But the difference is, some of the best shooters in the National Basketball League have a disparity between there two point percentage and their three point percentage. Larry Bird on the other hand has the closest two percentages and three point percentage gap. to clarify, he was able to shoot anywehre from the court , far or short, and have the same accuracy everywhere. He was effeient from anywhere on the court which made him a dangerous weapon from the three point line, inside the arc, and even inside the paint.
+
+
+
+
+
+
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+years <- 1980:2022
+
+allplayers <- tibble()
+
+for (i in years){
+
+url <- paste0("https://www.basketball-reference.com/leagues/NBA_", i, "_totals.html")
+
+stats <- url %>% 
+  read_html() %>% 
+  html_nodes(xpath='//*[@id="totals_stats"]') %>%
+  html_table()
+
+stats <- stats[[1]] %>% filter(Rk != "Rk") %>% mutate_at(6:30, as.numeric) %>% mutate(Rk=as.numeric(Rk), Age = as.numeric(Age)) %>% mutate(Season = i) %>% mutate(Player = gsub("\\*", "", Player))
+
+allplayers <- bind_rows(allplayers, stats)
+
+Sys.sleep(2)
+}
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+playerstep <- allplayers %>% filter(Tm != "TOT") %>% group_by(Player) %>% mutate(PointTotal = cumsum(PTS))
+
+pointslegends <- c("LeBron James", "Larry Bird", "Kobe Bryant", "Michael Jordan",  "Dirk Nowitzki","Dwyane Wade", "James Harden")
+  
+ legendsstep <- playerstep %>% filter(Player %in% pointslegends)
+  
+  
+birdstep <- playerstep %>% filter(Player == "Larry Bird")
+
+legendslabels <- playerstep %>% filter(Player %in% pointslegends) %>% group_by(Player) %>% filter(Season == max(Season))
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot() +
+  geom_step(data=playerstep, aes(x=Season, y=PointTotal, group=Player), color="grey") + 
+  geom_step(data=legendsstep, aes(x=Season, y=PointTotal, group=Player), color="Red") + 
+  geom_step(data=birdstep, aes(x=Season, y=PointTotal, group=Player), color="Green") + 
+  geom_point(data=legendslabels, aes(x=Season, y=PointTotal)) + 
+  geom_text_repel(data=legendslabels, aes(x=Season, y=PointTotal, label=Player))
+  
+```
